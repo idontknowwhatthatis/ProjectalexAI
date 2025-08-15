@@ -1,4 +1,4 @@
-rerimport { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer $AIzaSyD0fgC5_Sf_5cC_hS_KMtYmRQFxKaz2mAM`, // store key in .env.local
+          Authorization: `Bearer ${process.env.GOOGLE_API_KEY}`, // store your API key in .env.local
         },
         body: JSON.stringify({
           prompt: message,
