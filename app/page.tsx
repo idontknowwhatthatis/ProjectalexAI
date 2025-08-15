@@ -45,7 +45,22 @@ export default function Page() {
     if (debug) console.log("AI response:", aiResponse);
   };
 
+  // === RETURN JSX ===
   return (
     <main className="min-h-screen bg-gradient-to-b from-black to-red-900 text-white">
       <Header />
-      <section className="py-6 conta
+      <section className="py-6 container-max">
+        <DevPanel
+          onUpdateParams={handleUpdateParams}
+          onToggleDebug={handleToggleDebug}
+          onInjectMessage={handleInjectMessage}
+        />
+        {/* Chat Messages */}
+        <Chat messages={messages} onSendMessage={handleSendMessage} />
+      </section>
+      <footer className="container-max py-10 text-center text-xs text-slate-500">
+        Built with ❤️ by Alex.
+      </footer>
+    </main>
+  );
+}
