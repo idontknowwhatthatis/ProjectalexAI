@@ -1,56 +1,36 @@
-import { NextRequest } from "next/server";
-
-export const runtime = "nodejs"; // Vercel Node runtime
-
-// Minimal adapter from our UI messages to Gemini's expected payload
-function toGeminiContents(messages: { role: string; content: string }[]) {
-  return messages.map((m) => ({
-    role: m.role === "user" ? "user" : "model",
-    parts: [{ text: m.content }]
-  }));
-}
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
+  const { prompt, temperature, style, maxTokens } = await req.json();
+
   try {
-    const { messages } = await req.json();
-    if (!process.env.GOOGLE_API_KEY) {
-      return new Response(JSON.stringify({ error: "GOOGLE_API_KEY not set" }), { status: 500 });
-    }
-
-    const body = {
-      contents: toGeminiContents(messages || []),
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 2048
-      }
-    };
-
-    const res = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + process.env.GOOGLE_API_KEY,
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta2/models/chat-bison-001:generateMessage",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
+        headers: {
+          "Authorization": `Bearer AIzaSyD0fgC5_Sf_5cC_hS_KMtYmRQFxKaz2mAM`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: {
+            text: style === "funny"
+              ? `Answer in a funny way: ${prompt}`
+              : style === "formal"
+              ? `Answer in a formal tone: ${prompt}`
+              : prompt,
+          },
+          temperature,
+          maxOutputTokens: maxTokens,
+        }),
       }
     );
 
-    if (!res.ok) {
-      const text = await res.text();
-      return new Response(JSON.stringify({ error: text }), { status: 500 });
-    }
-
-    const data = await res.json();
-    const reply = data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join("") || "(No response)";
-
-    return new Response(JSON.stringify({ reply }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" }
-    });
-  } catch (e: any) {
-    return new Response(JSON.stringify({ error: e?.message || "Unknown error" }),
-      { status: 500 }
-    );
+    const data = await response.json();
+    const text = data?.candidates?.[0]?.content?.[0]?.text || "[No response]";
+    return NextResponse.json({ text });
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json({ text: "[Error fetching AI response]" });
   }
 }
