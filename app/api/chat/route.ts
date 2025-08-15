@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+rerimport { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `AIzaSyD0fgC5_Sf_5cC_hS_KMtYmRQFxKaz2mAM`, // store key in .env.local
+          Authorization: `Bearer $AIzaSyD0fgC5_Sf_5cC_hS_KMtYmRQFxKaz2mAM`, // store key in .env.local
         },
         body: JSON.stringify({
           prompt: message,
