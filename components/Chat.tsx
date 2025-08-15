@@ -1,13 +1,18 @@
 "use client";
 
-import { KeyboardEvent, useState } from "react";
+import { useState, KeyboardEvent } from "react";
+
+export interface ChatMessage {
+  text: string;
+  sender: "user" | "ai";
+}
 
 interface ChatProps {
-  messages: { sender: string; text: string }[];
+  messages: ChatMessage[];
   onSendMessage: (msg: string) => Promise<void>;
 }
 
-export default function Chat({ messages, onSendMessage }: ChatProps) {
+const Chat: React.FC<ChatProps> = ({ messages, onSendMessage }) => {
   const [input, setInput] = useState("");
 
   const handleKeyDown = async (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -21,17 +26,17 @@ export default function Chat({ messages, onSendMessage }: ChatProps) {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="p-4 h-[60vh] overflow-auto bg-black/50 rounded-lg">
+    <div className="flex flex-col h-[70vh] overflow-hidden rounded-lg bg-black/50 p-4">
+      <div className="flex-1 overflow-y-auto mb-2">
         {messages.map((msg, idx) => (
-          <div key={idx} className="my-1 p-2 bg-black/30 rounded">
-            <strong>{msg.sender}:</strong> {msg.text}
+          <div key={idx} className={`my-1 p-2 rounded ${msg.sender === "user" ? "bg-blue-500/50" : "bg-red-500/50"}`}>
+            {msg.text}
           </div>
         ))}
       </div>
 
       <textarea
-        className="w-full p-2 rounded bg-black/30 text-white"
+        className="w-full p-2 rounded resize-none bg-gray-800 text-white"
         value={input}
         onChange={e => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -40,4 +45,6 @@ export default function Chat({ messages, onSendMessage }: ChatProps) {
       />
     </div>
   );
-}
+};
+
+export default Chat;
