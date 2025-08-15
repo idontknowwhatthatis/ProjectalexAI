@@ -1,3 +1,5 @@
+"use client"; // ← THIS IS REQUIRED FOR useState AND OTHER HOOKS
+
 import { useState } from "react";
 import Header from "@/components/Header";
 import Chat from "@/components/Chat";
@@ -39,7 +41,6 @@ export default function Page() {
         ))}
       </div>
 
-      {/* DevPanel is hidden by default and can be toggled via your shortcut */}
       <DevPanel
         onUpdateParams={handleUpdateParams}
         onToggleDebug={handleToggleDebug}
