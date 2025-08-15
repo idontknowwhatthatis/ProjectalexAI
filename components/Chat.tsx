@@ -7,7 +7,7 @@ function newId() { return Math.random().toString(36).slice(2); }
 
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([
-    { id: newId(), role: "model", content: "Hello Alex. I’m ProjectAlex AI, powered by Gemini 2.5 Flash. How can I assist today?" }
+    { id: newId(), role: "model", content: "Hey there." }
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -68,8 +68,7 @@ export default function Chat() {
             <button type="submit" className="btn h-[52px] px-5">Send</button>
           </div>
           <div className="flex justify-between text-xs text-slate-400 px-1 pt-2">
-            <span>Model: <code>gemini-2.5-flash</code></span>
-            <span>Branding: <strong>ProjectAlex AI</strong></span>
+            <span>Model: <code>KEWL AI</code></span>
           </div>
         </div>
       </form>
