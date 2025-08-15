@@ -1,18 +1,18 @@
-theme: {
-  extend: {
-    colors: {
-      brand: {
-        50: "#ffe5e5",
-        100: "#ffb3b3",
-        200: "#ff8080",
-        300: "#ff4d4d",
-        400: "#ff1a1a",
-        500: "#e60000",
-        600: "#b30000",
-        700: "#800000",
-        800: "#4d0000",
-        900: "#1a0000",
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./app/**/*.{js,ts,jsx,tsx}", 
+    "./components/**/*.{js,ts,jsx,tsx}"
+  ],
+  theme: {
+    extend: {
+      colors: {
+        'dark-red': '#8b0000',
+      },
+      backgroundImage: {
+        'black-red-gradient': 'linear-gradient(to bottom, #000000, #8b0000)',
       },
     },
   },
-},
+  plugins: [],
+};
