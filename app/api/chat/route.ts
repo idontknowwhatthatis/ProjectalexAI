@@ -1,36 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const { prompt, temperature, style, maxTokens } = await req.json();
+  const body = await req.json();
+  const { message, aiParams } = body;
 
   try {
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta2/models/chat-bison-001:generateMessage",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
       {
         method: "POST",
         headers: {
-          "Authorization": `Bearer AIzaSyD0fgC5_Sf_5cC_hS_KMtYmRQFxKaz2mAM`,
           "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.GOOGLE_API_KEY}`, // store key in .env.local
         },
         body: JSON.stringify({
-          prompt: {
-            text: style === "funny"
-              ? `Answer in a funny way: ${prompt}`
-              : style === "formal"
-              ? `Answer in a formal tone: ${prompt}`
-              : prompt,
-          },
-          temperature,
-          maxOutputTokens: maxTokens,
+          prompt: message,
+          temperature: aiParams.temperature,
+          maxOutputTokens: aiParams.maxTokens,
+          candidateCount: 1,
         }),
       }
     );
 
     const data = await response.json();
-    const text = data?.candidates?.[0]?.content?.[0]?.text || "[No response]";
-    return NextResponse.json({ text });
-  } catch (e) {
-    console.error(e);
-    return NextResponse.json({ text: "[Error fetching AI response]" });
+    const reply = data.candidates?.[0]?.content?.[0]?.text || "[No response]";
+
+    return NextResponse.json({ reply });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ reply: "[Error generating response]" }, { status: 500 });
   }
 }
