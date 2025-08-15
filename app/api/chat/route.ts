@@ -4,14 +4,25 @@ export async function POST(req: NextRequest) {
   try {
     const { messages, aiParams } = await req.json();
 
-    // Build Gemini 2 request
+    // Build the prompt text from messages
+    let promptText = messages
+      .map((m: any) => (m.user ? `User: ${m.text}` : `AI: ${m.text}`))
+      .join("\n");
+    promptText += "\nAI:";
+
+    // Gemini 2 API request body
     const body = {
-      prompt: messages.map((m: any) => `${m.user ? "User: " : "AI: "}${m.text}`).join("\n") + "\nAI:",
+      contents: [
+        {
+          parts: [
+            {
+              text: promptText
+            }
+          ]
+        }
+      ],
       temperature: aiParams?.temperature ?? 1,
-      maxOutputTokens: aiParams?.maxTokens ?? 150,
-      candidateCount: 1,
-      topK: 40,
-      topP: 0.95,
+      maxOutputTokens: aiParams?.maxTokens ?? 150
     };
 
     const response = await fetch(
@@ -20,19 +31,22 @@ export async function POST(req: NextRequest) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer AIzaSyD0fgC5_Sf_5cC_hS_KMtYmRQFxKaz2mAM",
+          "X-goog-api-key": "AIzaSyD0fgC5_Sf_5cC_hS_KMtYmRQFxKaz2mAM"
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify(body)
       }
     );
 
     const data = await response.json();
 
-    // Extract the text safely
-    const text =
-      data?.candidates?.[0]?.content
-        ?.map((c: any) => c?.text || "")
-        .join("") || "[Error generating response]";
+    // Extract AI-generated text
+    let text = "[Error generating response]";
+    if (data?.contents?.length > 0) {
+      const content = data.contents[0];
+      if (content?.parts?.length > 0) {
+        text = content.parts.map((p: any) => p.text || "").join("");
+      }
+    }
 
     return NextResponse.json({ text });
   } catch (error) {
