@@ -1,4 +1,4 @@
-"use client"; // ← THIS IS REQUIRED FOR useState AND OTHER HOOKS
+"use client"; // Important: enables useState in this Client Component
 
 import { useState } from "react";
 import Header from "@/components/Header";
@@ -26,14 +26,14 @@ export default function Page() {
   };
 
   return (
-    <main>
+    <main className="flex flex-col min-h-screen">
       <Header />
-      
+
       <section className="py-6">
         <Chat />
       </section>
 
-      <div className="p-4 h-[80vh] overflow-auto bg-gradient-to-b from-black to-red-800 text-white rounded-lg">
+      <div className="flex-1 p-4 overflow-auto bg-gradient-to-b from-black to-red-800 text-white rounded-lg">
         {messages.map((msg, idx) => (
           <div key={idx} className="my-1 p-2 bg-black/50 rounded break-words">
             {msg}
