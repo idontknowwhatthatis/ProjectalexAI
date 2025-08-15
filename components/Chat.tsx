@@ -1,77 +1,66 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import MessageBubble, { type Message } from "@/components/MessageBubble";
+import { useState, useRef, useEffect, KeyboardEvent } from "react";
 
-function newId() { return Math.random().toString(36).slice(2); }
+interface ChatProps {
+  messages: string[];
+  onSendMessage: (msg: string) => void;
+}
 
-export default function Chat() {
-  const [messages, setMessages] = useState<Message[]>([
-    { id: newId(), role: "model", content: "Hey there." }
-  ]);
+export default function Chat({ messages, onSendMessage }: ChatProps) {
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const bottomRef = useRef<HTMLDivElement | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
+  // Scroll to bottom whenever messages update
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  async function sendMessage(e?: React.FormEvent) {
-    e?.preventDefault();
-    if (!input.trim() || loading) return;
-
-    const userMsg: Message = { id: newId(), role: "user", content: input.trim() };
-    setMessages((m) => [...m, userMsg]);
+  const handleSend = () => {
+    if (input.trim() === "") return;
+    onSendMessage(input.trim());
     setInput("");
-    setLoading(true);
+  };
 
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [...messages, userMsg].map(({ role, content }) => ({ role, content })) })
-      });
-
-      if (!res.ok) throw new Error(await res.text());
-      const data = await res.json();
-      const modelMsg: Message = { id: newId(), role: "model", content: data.reply };
-      setMessages((m) => [...m, modelMsg]);
-    } catch (err: any) {
-      setMessages((m) => [...m, { id: newId(), role: "model", content: `⚠️ Error: ${err?.message || "request failed"}` }]);
-    } finally {
-      setLoading(false);
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
     }
-  }
+  };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] container-max">
-      <div className="flex-1 overflow-y-auto py-6 space-y-3">
-        {messages.map((m) => (
-          <MessageBubble key={m.id} message={m} />
+    <div className="flex flex-col h-[70vh] border border-gray-700 rounded-lg overflow-hidden">
+      {/* Messages */}
+      <div className="flex-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-red-700 scrollbar-track-black">
+        {messages.map((msg, idx) => (
+          <div
+            key={idx}
+            className="mb-2 p-2 bg-black/50 rounded break-words"
+          >
+            {msg}
+          </div>
         ))}
-        {loading && (
-          <div className="text-xs text-slate-400 animate-pulse">ProjectAlex AI is thinking…</div>
-        )}
-        <div ref={bottomRef} />
+        <div ref={messagesEndRef} />
       </div>
-      <form onSubmit={sendMessage} className="sticky bottom-0 bg-gradient-to-t from-slate-900 via-slate-900/70 to-transparent py-4">
-        <div className="card p-2">
-          <div className="flex items-end gap-2">
-            <textarea
-              className="input min-h-[52px] max-h-40 resize-y"
-              placeholder="Ask anything… (Shift+Enter for newline)"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-              }}
-            />
-            <button type="submit" className="btn h-[52px] px-5">Send</button>
-          </div>
-          <div className="flex justify-between text-xs text-slate-400 px-1 pt-2">
-            <span>Model: <code>KEWL AI</code></span>
-          </div>
-        </div>
-      </form>
+
+      {/* Input */}
+      <div className="p-2 border-t border-gray-700 bg-black/80">
+        <textarea
+          className="w-full p-2 rounded bg-black text-white resize-none focus:outline-none focus:ring-2 focus:ring-red-700"
+          rows={2}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Type your message..."
+        />
+        <button
+          className="mt-2 w-full bg-red-700 hover:bg-red-800 text-white py-2 rounded"
+          onClick={handleSend}
+        >
+          Send
+        </button>
+      </div>
     </div>
   );
 }
