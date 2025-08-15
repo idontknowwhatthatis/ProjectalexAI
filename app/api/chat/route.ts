@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.GOOGLE_API_KEY}`, // store your API key in .env.local
+          Authorization: `Bearer $AIzaSyD0fgC5_Sf_5cC_hS_KMtYmRQFxKaz2mAM`, // store your API key in .env.local
         },
         body: JSON.stringify({
           prompt: message,
